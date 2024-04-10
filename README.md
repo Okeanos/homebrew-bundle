@@ -1,6 +1,6 @@
 # Homebrew Bundle
 
-Bundler for non-Ruby dependencies from Homebrew, Homebrew Cask, Mac App Store, Whalebrew and Visual Studio Code.
+Bundler for non-Ruby dependencies from Homebrew, Homebrew Cask, Mac App Store, Whalebrew, Visual Studio Code, and JetBrains IDEs.
 
 ## Requirements
 
@@ -13,6 +13,8 @@ Bundler for non-Ruby dependencies from Homebrew, Homebrew Cask, Mac App Store, W
 [Whalebrew](https://github.com/whalebrew/whalebrew) is optional and used for installing Whalebrew images.
 
 [Visual Studio Code](https://code.visualstudio.com/) is optional and used for installing Visual Studio Code extensions.
+
+[JetBrains IDEs](https://www.jetbrains.com) such as IntelliJ are optional and used for installing the respective extensions.
 
 ## Installation
 
@@ -64,6 +66,12 @@ whalebrew "whalebrew/wget"
 
 # 'vscode --install-extension'
 vscode "GitHub.codespaces"
+
+# JetBrains IDEs
+# 'idea installPlugins tanvd.grazi'
+jetbrains "tanvd.grazi", ide: "idea"
+# 'idea installPlugins com.example.myplugin https://plugins.example.com/updatePlugins.xml'
+jetbrains "com.example.myplugin", ide: "idea", repository: "https://plugins.example.com/updatePlugins.xml"
 ```
 
 ## Versions and lockfiles

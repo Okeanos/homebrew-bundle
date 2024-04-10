@@ -20,6 +20,8 @@ describe Bundle::Dsl do
         mas '1Password', id: 443987910
         whalebrew 'whalebrew/wget'
         vscode 'GitHub.codespaces'
+        jetbrains 'tanvd.grazi', args { ide: 'idea' }
+        jetbrains 'com.example.myplugin', args { ide: 'goland', repository: 'https://plugins.example.com/updatePlugins.xml' }
       EOS
     end
 
@@ -52,6 +54,10 @@ describe Bundle::Dsl do
       expect(dsl.entries[9].options).to eql(id: 443_987_910)
       expect(dsl.entries[10].name).to eql("whalebrew/wget")
       expect(dsl.entries[11].name).to eql("GitHub.codespaces")
+      expect(dsl.entries[12].name).to eql("tandv.grazi")
+      expect(dsl.entries[12].options).to eql(args: { ide: "idea"})
+      expect(dsl.entries[13].name).to eql("com.example.myplugin")
+      expect(dsl.entries[13].options).to eql(args: { ide: "goland", repository: "https://plugins.example.com/updatePlugins.xml" })
     end
   end
 
@@ -70,6 +76,7 @@ describe Bundle::Dsl do
     it "errors on bad options" do
       expect { described_class.new "brew 'foo', ['bad_option']" }.to raise_error(RuntimeError)
       expect { described_class.new "cask 'foo', ['bad_option']" }.to raise_error(RuntimeError)
+      expect { described_class.new "jetbrains 'foo', ['bad_option']" }.to raise_error(RuntimeError)
       expect { described_class.new "tap 'foo', ['bad_clone_target']" }.to raise_error(RuntimeError)
     end
   end

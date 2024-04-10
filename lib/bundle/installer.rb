@@ -30,6 +30,8 @@ module Bundle
           Bundle::WhalebrewInstaller
         when :vscode
           Bundle::VscodeExtensionInstaller
+        when :jetbrains
+          Bundle::JetBrainsExtensionInstaller
         when :tap
           verb = "Tapping"
           options = entry.options

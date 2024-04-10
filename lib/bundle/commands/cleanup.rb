@@ -15,6 +15,7 @@ module Bundle
         Bundle::BrewDumper.reset!
         Bundle::TapDumper.reset!
         Bundle::VscodeExtensionDumper.reset!
+        Bundle::JetBrainsExtensionDumper.reset!
         Bundle::BrewServices.reset!
       end
 
@@ -23,6 +24,7 @@ module Bundle
         formulae = formulae_to_uninstall(global:, file:)
         taps = taps_to_untap(global:, file:)
         vscode_extensions = vscode_extensions_to_uninstall(global:, file:)
+        jetbrains_extensions = jetbrains_extensions_to_uninstall(global:, file:)
         if force
           if casks.any?
             args = zap ? ["--zap"] : []
@@ -39,6 +41,11 @@ module Bundle
 
           vscode_extensions.each do |extension|
             Kernel.system "code", "--uninstall-extension", extension
+          end
+
+          if jetbrains_extensions.any?
+            puts "JetBrains IDEs do not support removing extensions from the CLI. You have to manually remove them:"
+            puts Formatter.columns jetbrains_extensions
           end
 
           cleanup = system_output_no_stderr(HOMEBREW_BREW_FILE, "cleanup")
@@ -62,6 +69,11 @@ module Bundle
           if vscode_extensions.any?
             puts "Would uninstall VSCode extensions:"
             puts Formatter.columns vscode_extensions
+          end
+
+          if jetbrains_extensions.any?
+            puts "Would uninstall JetBrains extensions:"
+            puts Formatter.columns jetbrains_extensions
           end
 
           cleanup = system_output_no_stderr(HOMEBREW_BREW_FILE, "cleanup", "--dry-run")
@@ -151,6 +163,19 @@ module Bundle
         return [].freeze if kept_extensions.empty?
 
         current_extensions = Bundle::VscodeExtensionDumper.extensions
+        current_extensions - kept_extensions
+      end
+
+      def jetbrains_extensions_to_uninstall(global: false, file: nil)
+        @dsl ||= Bundle::Dsl.new(Brewfile.read(global:, file:))
+        kept_extensions = @dsl.entries.select { |e| e.type == :jetbrains }.map { |x| "#{x.name.downcase} (#{x.options[:ide]})" }
+
+        # To provide a graceful migration from `Brewfile`s that don't yet or
+        # don't want to use `jetbrains`: don't remove any extensions if we don't
+        # find any in the `Brewfile`.
+        return [].freeze if kept_extensions.empty?
+
+        current_extensions = Bundle::JetBrainsExtensionDumper.extensions
         current_extensions - kept_extensions
       end
 

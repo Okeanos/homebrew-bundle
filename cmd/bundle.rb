@@ -9,14 +9,14 @@ module Homebrew
       usage_banner <<~EOS
         `bundle` [<subcommand>]
 
-        Bundler for non-Ruby dependencies from Homebrew, Homebrew Cask, Mac App Store, Whalebrew and Visual Studio Code.
+        Bundler for non-Ruby dependencies from Homebrew, Homebrew Cask, Mac App Store, Whalebrew, Visual Studio Code, and JetBrains IDEs.
 
         `brew bundle` [`install`]:
         Install and upgrade (by default) all dependencies from the `Brewfile`.
 
         You can specify the `Brewfile` location using `--file` or by setting the `HOMEBREW_BUNDLE_FILE` environment variable.
 
-        You can skip the installation of dependencies by adding space-separated values to one or more of the following environment variables: `HOMEBREW_BUNDLE_BREW_SKIP`, `HOMEBREW_BUNDLE_CASK_SKIP`, `HOMEBREW_BUNDLE_MAS_SKIP`, `HOMEBREW_BUNDLE_WHALEBREW_SKIP`, `HOMEBREW_BUNDLE_TAP_SKIP`.
+        You can skip the installation of dependencies by adding space-separated values to one or more of the following environment variables: `HOMEBREW_BUNDLE_BREW_SKIP`, `HOMEBREW_BUNDLE_CASK_SKIP`, `HOMEBREW_BUNDLE_MAS_SKIP`, `HOMEBREW_BUNDLE_WHALEBREW_SKIP`, `HOMEBREW_BUNDLE_TAP_SKIP`, `HOMEBREW_BUNDLE_JETBRAINS_SKIP`.
 
         `brew bundle` will output a `Brewfile.lock.json` in the same directory as the `Brewfile` if all dependencies are installed successfully. This contains dependency and system status information which can be useful for debugging `brew bundle` failures and replicating a "last known good build" state. You can opt-out of this behaviour by setting the `HOMEBREW_BUNDLE_NO_LOCK` environment variable or passing the `--no-lock` option. You may wish to check this file into the same version control system as your `Brewfile` (or ensure your version control system ignores it if you'd prefer to rely on debugging information from a local machine).
 
@@ -79,6 +79,8 @@ module Homebrew
              description: "`list` Whalebrew dependencies."
       switch "--vscode",
              description: "`list` VSCode extensions."
+      switch "--jetbrains",
+             description: "`list` JetBrains IDEs extensions."
       switch "--describe",
              env:         :bundle_dump_describe,
              description: "`dump` adds a description comment above each line, unless the " \
@@ -137,6 +139,7 @@ module Homebrew
           mas:        args.mas?,
           whalebrew:  args.whalebrew?,
           vscode:     args.vscode?,
+          jetbrains:  args.jetbrains?,
         )
       when "cleanup"
         Bundle::Commands::Cleanup.run(
@@ -169,6 +172,7 @@ module Homebrew
           mas:       args.mas?,
           whalebrew: args.whalebrew?,
           vscode:    args.vscode?,
+          jetbrains: args.jetbrains?,
           brews:     args.brews?,
         )
       else

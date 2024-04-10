@@ -58,12 +58,13 @@ module Bundle
     CheckResult = Struct.new :work_to_be_done, :errors
 
     CHECKS = {
-      taps_to_tap:           "Taps",
-      casks_to_install:      "Casks",
-      extensions_to_install: "VSCode Extensions",
-      apps_to_install:       "Apps",
-      formulae_to_install:   "Formulae",
-      formulae_to_start:     "Services",
+      taps_to_tap:                     "Taps",
+      casks_to_install:                "Casks",
+      vscode_extensions_to_install:    "VSCode Extensions",
+      jetbrains_extensions_to_install: "JetBrains IDE Extensions",
+      apps_to_install:                 "Apps",
+      formulae_to_install:             "Formulae",
+      formulae_to_start:               "Services",
     }.freeze
 
     def check(global: false, file: nil, exit_on_first_error: false, no_upgrade: false, verbose: false)
@@ -115,8 +116,15 @@ module Bundle
       )
     end
 
-    def extensions_to_install(exit_on_first_error: false, no_upgrade: false, verbose: false)
+    def vscode_extensions_to_install(exit_on_first_error: false, no_upgrade: false, verbose: false)
       Bundle::Checker::VscodeExtensionChecker.new.find_actionable(
+        @dsl.entries,
+        exit_on_first_error:, no_upgrade:, verbose:,
+      )
+    end
+
+    def jetbrains_extensions_to_install(exit_on_first_error: false, no_upgrade: false, verbose: false)
+      Bundle::Checker::JetBrainsExtensionChecker.new.find_actionable(
         @dsl.entries,
         exit_on_first_error:, no_upgrade:, verbose:,
       )

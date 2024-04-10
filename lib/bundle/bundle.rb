@@ -29,6 +29,10 @@ module Bundle
       @vscode_installed ||= which("code").present?
     end
 
+    def jetbrains_ide_installed(name)
+      which(name).present?
+    end
+
     def whalebrew_installed?
       @whalebrew_installed ||= which_formula("whalebrew")
     end

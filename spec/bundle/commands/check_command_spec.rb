@@ -18,11 +18,12 @@ describe Bundle::Commands::Check do
     it "does not raise an error" do
       allow_any_instance_of(Pathname).to receive(:read).and_return("")
       nothing = []
-      allow(Bundle::Checker).to receive_messages(casks_to_install:      nothing,
-                                                 formulae_to_install:   nothing,
-                                                 apps_to_install:       nothing,
-                                                 taps_to_tap:           nothing,
-                                                 extensions_to_install: nothing)
+      allow(Bundle::Checker).to receive_messages(casks_to_install:                nothing,
+                                                 formulae_to_install:             nothing,
+                                                 apps_to_install:                 nothing,
+                                                 taps_to_tap:                     nothing,
+                                                 vscode_extensions_to_install:    nothing,
+                                                 jetbrains_extensions_to_install: nothing)
       expect { do_check }.not_to raise_error
     end
   end
@@ -155,7 +156,7 @@ describe Bundle::Commands::Check do
     end
   end
 
-  context "when extension not installed" do
+  context "when VSCode extension not installed" do
     let(:expected_output) do
       <<~MSG
         brew bundle can't satisfy your Brewfile's dependencies.
@@ -172,6 +173,27 @@ describe Bundle::Commands::Check do
 
     it "raises an error that doesn't mention upgrade" do
       allow_any_instance_of(Pathname).to receive(:read).and_return("vscode 'foo'")
+      expect { do_check }.to raise_error(SystemExit).and output(expected_output).to_stdout
+    end
+  end
+
+  context "when JetBrains extension not installed" do
+    let(:expected_output) do
+      <<~MSG
+        brew bundle can't satisfy your Brewfile's dependencies.
+        → JetBrains Extension foo (idea) needs to be installed.
+        Satisfy missing dependencies with `brew bundle install`.
+      MSG
+    end
+    let(:verbose) { true }
+
+    before do
+      Bundle::Checker.reset!
+      allow(Bundle::Checker::JetBrainsExtensionChecker).to receive(:installed_and_up_to_date?).and_return(false)
+    end
+
+    it "raises an error that doesn't mention upgrade" do
+      allow_any_instance_of(Pathname).to receive(:read).and_return("jetbrains 'foo'")
       expect { do_check }.to raise_error(SystemExit).and output(expected_output).to_stdout
     end
   end
@@ -201,7 +223,24 @@ describe Bundle::Commands::Check do
   context "when there are VSCode extensions to install" do
     before do
       allow_any_instance_of(Pathname).to receive(:read).and_return("")
-      allow(Bundle::Checker).to receive(:extensions_to_install).and_return(["asdf"])
+      allow(Bundle::Checker).to receive(:vscode_extensions_to_install).and_return(["asdf"])
+    end
+
+    it "does not check for formulae" do
+      expect(Bundle::Checker).not_to receive(:formulae_to_install)
+      expect { do_check }.to raise_error(SystemExit)
+    end
+
+    it "does not check for apps" do
+      expect(Bundle::Checker).not_to receive(:apps_to_install)
+      expect { do_check }.to raise_error(SystemExit)
+    end
+  end
+
+  context "when there are JetBrains extensions to install" do
+    before do
+      allow_any_instance_of(Pathname).to receive(:read).and_return("")
+      allow(Bundle::Checker).to receive(:jetbrains_extensions_to_install).and_return(["asdf"])
     end
 
     it "does not check for formulae" do
@@ -258,6 +297,14 @@ describe Bundle::Commands::Check do
       allow_any_instance_of(Pathname).to receive(:read).and_return("vscode 'abc'\nvscode 'def'")
 
       expect_any_instance_of(Bundle::Checker::VscodeExtensionChecker).to \
+        receive(:exit_early_check).once.and_call_original
+      expect { do_check }.to raise_error(SystemExit)
+    end
+
+    it "stops checking after the first JetBrains extension" do
+      allow_any_instance_of(Pathname).to receive(:read).and_return("jetbrains 'abc'\njetbrains 'def'")
+
+      expect_any_instance_of(Bundle::Checker::JetBrainsExtensionChecker).to \
         receive(:exit_early_check).once.and_call_original
       expect { do_check }.to raise_error(SystemExit)
     end

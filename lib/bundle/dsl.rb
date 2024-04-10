@@ -80,6 +80,14 @@ module Bundle
       @entries << Entry.new(:vscode, name)
     end
 
+    def jetbrains(name, options = {})
+      raise "name(#{name.inspect}) should be a String object" unless name.is_a? String
+      raise "options(#{options.inspect}) should be a Hash object" unless options.is_a? Hash
+      raise "options(#{options[:ide]}) should be a String object" unless options.is_a? String
+
+      @entries << Entry.new(:jetbrains, name, options)
+    end
+
     def tap(name, clone_target = nil, options = {})
       raise "name(#{name.inspect}) should be a String object" unless name.is_a? String
       if clone_target && !clone_target.is_a?(String)
